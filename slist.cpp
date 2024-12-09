@@ -11,13 +11,35 @@ slist::~slist() {
     clear();
 }
 
-void slist::clear() {
-    Node *next;
-    while (head != nullptr) {
-        next = head->next;
-        delete head;
-        head = next;
+void slist::swap(int index1, int index2) {
+    if (index1 == index2) return;
+
+    Node* node1 = get(index1);
+    Node* node2 = get(index2);
+
+    if (node1 == nullptr || node2 == nullptr) {
+        throw out_of_range("Index out of bounds");
     }
+
+  
+    Airport temp = node1->data;
+    node1->data = node2->data;
+    node2->data = temp;
+}
+
+bool slist::equals(slist a) {
+    Node *current = head;
+    Node *aCurrent = a.head;
+    while (current != nullptr && aCurrent != nullptr) {
+        if (current->data.code != aCurrent->data.code || 
+            current->data.longitude != aCurrent->data.longitude || 
+            current->data.latitude != aCurrent->data.latitude) {
+            return false;
+        }
+        current = current->next;
+        aCurrent = aCurrent->next;
+    }
+    return (current == nullptr && aCurrent == nullptr);
 }
 
 void slist::add(Airport newA) {
@@ -33,24 +55,6 @@ void slist::add(Airport newA) {
         }
         current->next = pntr;
     }
-}
-
-
-
-
-bool slist::equals(slist a) {
-    Node *current = head;
-    Node *aCurrent = a.head;
-    while (current != nullptr && aCurrent != nullptr) {
-        if (current->data.code != aCurrent->data.code || 
-            current->data.longitude != aCurrent->data.longitude || 
-            current->data.latitude != aCurrent->data.latitude) {
-            return false;
-        }
-        current = current->next;
-        aCurrent = aCurrent->next;
-    }
-    return (current == nullptr && aCurrent == nullptr);
 }
 
 
@@ -75,6 +79,14 @@ Airport slist::getAirport(int index) {
     }
 }
 
+void slist::clear() {
+    Node *next;
+    while (head != nullptr) {
+        next = head->next;
+        delete head;
+        head = next;
+    }
+}
 
 void slist::insert(int index, Airport aVal) {
     if (index < 0) throw out_of_range("Index cannot be negative");
@@ -97,23 +109,6 @@ void slist::insert(int index, Airport aVal) {
     Node* newNode = new Node(aVal);
     newNode->next = current->next;
     current->next = newNode;
-}
-
-
-void slist::swap(int index1, int index2) {
-    if (index1 == index2) return;
-
-    Node* node1 = get(index1);
-    Node* node2 = get(index2);
-
-    if (node1 == nullptr || node2 == nullptr) {
-        throw out_of_range("Index out of bounds");
-    }
-
-  
-    Airport temp = node1->data;
-    node1->data = node2->data;
-    node2->data = temp;
 }
 
 
