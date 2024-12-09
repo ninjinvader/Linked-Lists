@@ -5,7 +5,7 @@
 
 using namespace std;
 
-int x = 0;
+
 #define pi 3.14159265358979323846
 #define earthRadiusKm 6371.0
 
@@ -16,13 +16,13 @@ Node* mergeSortRecursive(Node* head);
 Node* getMiddle(Node* head); 
 bool compare(Airport a, Airport b);
 double distanceEarth(double lat1d, double lon1d, double lat2d, double lon2d); 
-void findAirportsWithin100Miles(slist* airportList, double refLat, double refLon) {
-    Node* current = airportList->head;
+void within100Miles(slist* airports, double refLat, double refLon) {
+    Node* current = airports->head;
     while (current != nullptr) {
         double distKm = distanceEarth(current->data.latitude, current->data.longitude, refLat, refLon);
         double dist = distKm * 0.621371;
         if (dist <= 100.0) {
-            cout << current->data.code << " is within 100 miles. Distance: " << dist << " miles." << endl;
+            cout << current->data.code << " is <= 100 miles away. The distance is " << dist << " miles." << endl;
         }
         current = current->next;
     }
@@ -32,8 +32,8 @@ int main()
     ifstream infile;
     int i = 0;
     char cNum[10];
-    slist airportList;
-    int airportCount;
+    slist airports;
+    int airportNum;
 
     infile.open("./USAirportCodes.csv", ifstream::in);
     if (infile.is_open())
@@ -50,29 +50,43 @@ int main()
 
             i++;
             c++;
-            airportList.add(current);
+            airports.add(current);
         }
-        airportCount = c;
+        airportNum = c;
         infile.close();
     }
 
 
-    for(int c = 0; c < airportCount; c++){
-        //cout <<  distanceEarth(airportList.getAirport(c).latitude, airportList.getAirport(c).longitude, 30.1944, 97.6700) << endl;
-    }
-   mergeSort(&airportList);
+    
+   mergeSort(&airports);
 
-    for (int c = 0; c < airportCount; c++)
+    for (int c = 0; c < airportNum; c++)
     {
-       double lat =  airportList.getAirport(c).latitude;
-       double longi =  airportList.getAirport(c).longitude;
-       cout << airportList.getAirport(c).code << " long: " << airportList.getAirport(c).longitude
-             << " lat: " << airportList.getAirport(c).latitude << " dis: " << distanceEarth(30.1944, 97.6700,lat,longi) << endl;
-        //cout << distanceEarth(30.1944, 97.6700,airportList.getAirport(c).latitude, airportList.getAirport(c).longitude) << endl;
+       double lat =  airports.getAirport(c).latitude;
+       double longi =  airports.getAirport(c).longitude;
+       cout << airports.getAirport(c).code << " long: " << airports.getAirport(c).longitude
+             << " lat: " << airports.getAirport(c).latitude << " dis: " << distanceEarth(30.1944, 97.6700,lat,longi) << endl;
     }
     cout << endl;
-    cout << airportList.getAirport(airportCount-3).code << " long: " << airportList.getAirport(airportCount-3).longitude << " lat: " << airportList.getAirport(airportCount-3).latitude << " dis: " << distanceEarth(airportList.getAirport(airportCount-3).latitude, airportList.getAirport(airportCount-3).longitude, 30.1944, 97.6700) << endl ;
-    findAirportsWithin100Miles(&airportList, 30.1944, 97.6700);
+    cout << airports.getAirport(airportNum-3).code << " long: " << airports.getAirport(airportNum-3).longitude << " lat: " << airports.getAirport(airportNum-3).latitude << " dis: " << distanceEarth(airports.getAirport(airportNum-3).latitude, airports.getAirport(airportNum-3).longitude, 30.1944, 97.6700) << endl ;
+    within100Miles(&airports, 30.1944, 97.6700);
+}
+
+Node* getMiddle(Node* head)
+{
+    if (!head)
+        return nullptr;
+
+    Node* slow = head;
+    Node* fast = head;
+
+    while (fast->next && fast->next->next)
+    {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+
+    return slow;
 }
 
 bool compare(Airport a, Airport b)
@@ -94,51 +108,35 @@ Node* mergeSortRecursive(Node* head)
         return head;
 
     // Found this technique online finding middle node
-    Node* middle = getMiddle(head);
-    Node* nextToMiddle = middle->next;
-    middle->next = nullptr; 
-    Node* left = mergeSortRecursive(head);
-    Node* right = mergeSortRecursive(nextToMiddle);
+    Node* center = getMiddle(head);
+    Node* center1 = center->next;
+    center->next = nullptr; 
+    Node* l = mergeSortRecursive(head);
+    Node* r = mergeSortRecursive(center1);
 
-    return merge(left, right);
+    return merge(l, r);
 }
 
-Node* merge(Node* left, Node* right)
+Node* merge(Node* l, Node* r)
 {
 
-    if (!left)
-        return right;
-    if (!right)
-        return left;
+    if (!l)
+        return r;
+    if (!r)
+        return l;
 
-    if (compare(left->data, right->data))
+    if (compare(l->data, r->data))
     {
-        left->next = merge(left->next, right);
-        return left;
+        l->next = merge(l->next, r);
+        return l;
     }
     else
     {
-        right->next = merge(left, right->next);
-        return right;
+        r->next = merge(l, r->next);
+        return r;
     }
 }
 
-Node* getMiddle(Node* head)
-{
-    if (!head)
-        return nullptr;
-
-    Node* slow = head;
-    Node* fast = head;
-
-    while (fast->next && fast->next->next)
-    {
-        slow = slow->next;
-        fast = fast->next->next;
-    }
-
-    return slow;
-}
 
 double deg2rad(double deg) {
   return (deg * pi / 180);
